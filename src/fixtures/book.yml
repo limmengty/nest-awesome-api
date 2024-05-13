@@ -1,0 +1,8 @@
+entity: BookEntity
+items:
+  book{1..200}:
+    title: '{{internet.userName}}'
+    dateOfPublished: '{{datatype.datetime}}'
+    author: '{{internet.userName}}'
+    category: '{{hacker.noun}}'
+
