@@ -2,6 +2,29 @@ import { NestFactory } from '@nestjs/core';
 import { setupSwagger } from './swagger';
 import { useContainer } from 'class-validator';
 import { ValidationPipe } from '@nestjs/common';
+import { CrudConfigService } from '@nestjsx/crud';
+
+CrudConfigService.load({
+  query: {
+    limit: 10,
+  },
+  params: {
+    id: {
+      field: 'id',
+      type: 'uuid',
+      primary: true,
+    },
+  },
+  routes: {
+    updateOneBase: {
+      allowParamsOverride: true,
+    },
+    deleteOneBase: {
+      returnDeleted: true,
+    },
+  },
+});
+
 import { AppModule } from './app/app.module';
 
 async function bootstrap() {

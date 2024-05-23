@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { PasswordTransformer } from '../password.transformer';
 import { AppRoles } from '../../common/enum/roles.enum';
+import { UsersType } from 'src/modules/common/enum/user_type.enum';
 
 @Entity({
   name: 'users',
@@ -72,10 +73,21 @@ export class UserEntity {
   })
   password: string;
 
+  @Column({
+    type: 'enum',
+    enum: UsersType,
+    default: UsersType.PASSWORD,
+  })
+  userType: string;
+
+  @Column({ type: 'text', nullable: true })
+  picture: string;
+
   /**
    * Omit password from query selection
    */
   toJSON() {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...self } = this;
     return self;
   }

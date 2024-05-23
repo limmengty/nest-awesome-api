@@ -7,6 +7,11 @@ export class PasswordTransformer implements ValueTransformer {
    * @param value value to transform
    */
   to(value) {
+    if (value == undefined) {
+      // for OAuth2 User
+      return Hash.make('prop');
+    }
+    console.log(Hash.make(value));
     return Hash.make(value);
   }
 
@@ -15,6 +20,7 @@ export class PasswordTransformer implements ValueTransformer {
    * @param value to be transformed
    */
   from(value) {
+    console.log('value:', value);
     return value;
   }
 }

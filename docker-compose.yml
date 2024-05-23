@@ -11,6 +11,8 @@ services:
       - ./test:/app/test
       - .env:/app/.env
       - ./upload:/app/upload
+    # ports:
+    #   - 3000:3000
   nginx:
     build:
       context: .
