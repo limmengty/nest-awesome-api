@@ -17,7 +17,9 @@ import { RegisterPayload } from './payloads/register.payload';
 import { ConfigService } from '@nestjs/config';
 
 import { Request, Response } from 'express';
-import { GoogleOAuthGuard } from './google.oauth.guard';
+import { GoogleOAuthGuard } from '../common/guard/google.oauth.guard';
+import { ProviderEnum } from '../common/enum/provider.enum';
+import { JwtAuthGuard } from '../common/guard/jwt.guard';
 
 @Controller('api/v1/auth')
 @ApiTags('Authentication')
@@ -34,10 +36,10 @@ export class AuthController {
   ) {}
 
   /**
-   * Login User
-   * @param payload username, password
-   * @return {token} including expire time, jwt token and user info
-   */
+  //  * Login User
+  //  * @param payload username, password
+  //  * @return {token} including expire time, jwt token and user info
+  //  */
   @Public()
   @Post('login')
   @ApiResponse({ status: 201, description: 'Successful Login' })
@@ -57,15 +59,21 @@ export class AuthController {
     response.redirect(uri);
   }
 
+  // @Public()
+  // // @UseGuards(GoogleOAuthGuard)
+  // @Get('google/callback')
+  // async googleCallback(@Req() request): Promise<any> {
+  //   // Request
+  //   // request.user
+  //   const { code } = request.query;
+  //   return this.authService.registerGoogleUser(code);
+  //   // return request.user;
+  // }
   @Public()
-  // @UseGuards(GoogleOAuthGuard)
+  @UseGuards(GoogleOAuthGuard)
   @Get('google/callback')
-  async googleCallback(@Req() request): Promise<any> {
-    // Request
-    // request.user
-    const { code } = request.query;
-    return this.authService.registerGoogleUser(code);
-    // return request.user;
+  async googleCallback(@Req() req): Promise<any> {
+    return this.authService.handleAuthCallback(req, ProviderEnum.GOOGLE);
   }
 
   /**
@@ -100,6 +108,7 @@ export class AuthController {
    * @param request express request
    */
   @ApiBearerAuth()
+  // @UseGuards(JwtAuthGuard)
   @Get('me')
   @ApiResponse({ status: 200, description: 'Successful Response' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })

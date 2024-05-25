@@ -1,25 +1,14 @@
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
-  DeleteDateColumn,
-} from 'typeorm';
+import { Entity, Column, OneToMany } from 'typeorm';
 import { PasswordTransformer } from '../password.transformer';
 import { AppRoles } from '../../common/enum/roles.enum';
 import { UsersType } from 'src/modules/common/enum/user_type.enum';
+import { IntegrationEntity } from './integration.entity';
+import { CommonEntity } from 'src/modules/common/entity/common';
 
 @Entity({
   name: 'users',
 })
-export class UserEntity {
-  /**
-   * UUID column
-   */
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
+export class UserEntity extends CommonEntity {
   /**
    * Unique username column
    */
@@ -29,8 +18,8 @@ export class UserEntity {
   /**
    * Name column
    */
-  @Column({ type: 'text' })
-  name: string;
+  // @Column({ type: 'text' })
+  // name: string;
 
   /**
    * Email colum
@@ -46,24 +35,6 @@ export class UserEntity {
   roles: AppRoles[];
 
   /**
-   * created date column
-   */
-  @CreateDateColumn()
-  createdDate: Date;
-
-  /**
-   * updated date column
-   */
-  @UpdateDateColumn()
-  updatedDate: Date;
-
-  /**
-   * delete date column
-   */
-  @DeleteDateColumn()
-  deletedDate: Date;
-
-  /**
    * Password column
    */
   @Column({
@@ -73,12 +44,21 @@ export class UserEntity {
   })
   password: string;
 
-  @Column({
-    type: 'enum',
-    enum: UsersType,
-    default: UsersType.PASSWORD,
-  })
-  userType: string;
+  /**
+   * User registration type: email, Facebook, Google, or GitHub
+   */
+  @Column({ type: 'enum', enum: UsersType, default: UsersType.PASSWORD })
+  registrationType: string;
+
+  @OneToMany(() => IntegrationEntity, (integration) => integration.byUser)
+  integration: IntegrationEntity[];
+
+  // @Column({
+  //   type: 'enum',
+  //   enum: UsersType,
+  //   default: UsersType.PASSWORD,
+  // })
+  // userType: string;
 
   @Column({ type: 'text', nullable: true })
   picture: string;

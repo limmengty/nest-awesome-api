@@ -6,7 +6,6 @@ import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { TimeoutInterceptor } from '../modules/common/interceptor/timeout.interceptor';
 import * as redisStore from 'cache-manager-redis-store';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { JwtAuthGuard } from '../modules/auth/jwt-guard';
 import { CommonModule } from '../modules/common/common.module';
 import { AuthModule } from '../modules/auth/auth.module';
 import { UserModule } from '../modules/user';
@@ -14,6 +13,7 @@ import { LoggingInterceptor } from '../modules/common/interceptor/logging.interc
 import { RolesGuard } from '../modules/common/guard/roles.guard';
 import { BookModule } from 'src/modules/books/book.module';
 import { ChatModule } from 'src/modules/chat/chat.module';
+import { JwtAuthGuard } from 'src/modules/common/guard/jwt.guard';
 @Module({
   imports: [
     ConfigModule.forRoot({

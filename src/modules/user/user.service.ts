@@ -1,6 +1,8 @@
 import {
   BadRequestException,
   Body,
+  HttpException,
+  HttpStatus,
   Injectable,
   NotAcceptableException,
   Param,
@@ -15,12 +17,16 @@ import { ResetPayload } from '../auth/payloads/reset.payload';
 import { UpdatePayload } from './payloads/update.payload';
 import { RegisterPayload } from '../auth/payloads/register.payload';
 import { TypeOrmCrudService } from '@nestjsx/crud-typeorm';
+import { IntegrationEntity } from './entity/integration.entity';
+import { UsersType } from '../common/enum/user_type.enum';
 
 @Injectable()
 export class UsersService extends TypeOrmCrudService<UserEntity> {
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
+    @InjectRepository(IntegrationEntity)
+    private readonly integrationRepository: Repository<IntegrationEntity>,
   ) {
     super(userRepository);
   }
@@ -88,4 +94,49 @@ export class UsersService extends TypeOrmCrudService<UserEntity> {
       );
     }
   }
+
+  async getByEmail(email: string) {
+    try {
+      const user = await this.userRepository.findOne({ email: email });
+      if (user) {
+        return user;
+      }
+    } catch (e) {
+      throw new HttpException(
+        'User with this email does not exist',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+  }
+
+  async getIntegrationById(id: string): Promise<IntegrationEntity[]> {
+    return await this.integrationRepository
+      .createQueryBuilder('integration')
+      .where('integration.byUserId = :userId', { userId: id })
+      .orderBy('integration.created_at')
+      .getMany();
+  }
+  async saveUser(
+    payload: RegisterPayload,
+    type: UsersType,
+    picture: string,
+  ): Promise<UserEntity> {
+    return await this.userRepository.save(
+      this.userRepository.create({
+        ...payload,
+        username: payload.username + Date.now().toString(),
+        registrationType: type,
+        picture: picture,
+        // password: hashedPassword,
+      }),
+    );
+  }
+  // async saveUser(type: UsersType): Promise<UserEntity> {
+  //   return await this.userRepository.save(
+  //     this.userRepository.create({
+  //       registrationType: type,
+  //       // password: hashedPassword,
+  //     }),
+  //   );
+  // }
 }

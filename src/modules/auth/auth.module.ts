@@ -4,18 +4,19 @@ import { PassportModule } from '@nestjs/passport';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserEntity, UserModule } from '../user';
 import { AuthService } from './auth.service';
-import { JwtStrategy } from './jwt.strategy';
+import { JwtStrategy } from '../common/strategy/jwt.strategy';
 import { AuthController } from './auth.controller';
 import { HttpModule } from '@nestjs/axios';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { GoogleStrategy } from './google-strategy';
+import { GoogleStrategy } from '../common/strategy/google-strategy';
+import { IntegrationEntity } from '../user/entity/integration.entity';
 
 @Module({
   imports: [
     UserModule,
     HttpModule,
     ConfigModule,
-    TypeOrmModule.forFeature([UserEntity]),
+    TypeOrmModule.forFeature([UserEntity, IntegrationEntity]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
