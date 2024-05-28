@@ -1,8 +1,7 @@
 version: "2"
 services:
-  nest-1:
+  nest:
     build: .
-    container_name: mt-nest-1
     depends_on:
       - db
       - redis
@@ -13,29 +12,19 @@ services:
       - ./upload:/app/upload
     # ports:
     #   - 3000:3000
-  nest-2:
-    build: .
-    container_name: mt-nest-2
-    depends_on:
-      - db
-      - redis
-    volumes:
-      - ./src:/app/src
-      - ./test:/app/test
-      - .env:/app/.env
-      - ./upload:/app/upload
+    restart: unless-stopped
+    scale: 2
   nginx:
     build:
       context: .
       dockerfile: Dockerfile-nginx
     container_name: mt-nest-nginx
     depends_on:
-      - nest-1
-      - nest-2
+      - nest
     environment:
       - NGINX_SERVER_NAME=localhost
-      - NEST_HOST_1=nest-1
-      - NEST_HOST_2=nest-2
+      - NEST_HOST_1=nest-awesome-api-nest-1
+      - NEST_HOST_2=nest-awesome-api-nest-2
       - NEST_PORT=3000
       - NGINX_MAX_BODY=100M
     ports:
