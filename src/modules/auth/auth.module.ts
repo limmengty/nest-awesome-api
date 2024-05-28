@@ -10,6 +10,8 @@ import { HttpModule } from '@nestjs/axios';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { GoogleStrategy } from '../common/strategy/google-strategy';
 import { IntegrationEntity } from '../user/entity/integration.entity';
+import { RefreshTokenStrategy } from '../common/strategy/refresh-token.strategy';
+import { GithubStrategy } from '../common/strategy/github.strategy';
 
 @Module({
   imports: [
@@ -17,26 +19,33 @@ import { IntegrationEntity } from '../user/entity/integration.entity';
     HttpModule,
     ConfigModule,
     TypeOrmModule.forFeature([UserEntity, IntegrationEntity]),
-    PassportModule.register({ defaultStrategy: 'jwt' }),
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => {
-        return {
-          secret: configService.get<string>('JWT_SECRET_KEY'),
-          signOptions: {
-            ...(configService.get<string>('JWT_EXPIRATION_TIME')
-              ? {
-                  expiresIn: Number(configService.get('JWT_EXPIRATION_TIME')),
-                }
-              : {}),
-          },
-        };
-      },
-      inject: [ConfigService],
-    }),
+    JwtModule.register({}),
+    // PassportModule.register({ defaultStrategy: 'jwt' }),
+    // JwtModule.registerAsync({
+    //   imports: [ConfigModule],
+    //   useFactory: async (configService: ConfigService) => {
+    //     return {
+    //       secret: configService.get<string>('JWT_SECRET_KEY'),
+    //       signOptions: {
+    //         ...(configService.get<string>('JWT_EXPIRATION_TIME')
+    //           ? {
+    //               expiresIn: Number(configService.get('JWT_EXPIRATION_TIME')),
+    //             }
+    //           : {}),
+    //       },
+    //     };
+    //   },
+    //   inject: [ConfigService],
+    // }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, GoogleStrategy],
-  exports: [PassportModule.register({ defaultStrategy: 'jwt' })],
+  providers: [
+    AuthService,
+    JwtStrategy,
+    GoogleStrategy,
+    RefreshTokenStrategy,
+    GithubStrategy,
+  ],
+  // exports: [PassportModule.register({ defaultStrategy: 'jwt' })],
 })
 export class AuthModule {}

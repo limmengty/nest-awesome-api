@@ -6,11 +6,13 @@ import { PassportModule } from '@nestjs/passport';
 import { UsersService } from './user.service';
 import { UserGateWay } from './user.getway';
 import { IntegrationEntity } from './entity/integration.entity';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([UserEntity, IntegrationEntity]),
-    PassportModule.register({ defaultStrategy: 'jwt' }),
+    // PassportModule.register({ defaultStrategy: 'jwt' }),
+    JwtModule.register({}),
   ],
   exports: [UsersService],
   controllers: [UserController],

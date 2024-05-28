@@ -18,7 +18,7 @@ import { UpdatePayload } from './payloads/update.payload';
 import { RegisterPayload } from '../auth/payloads/register.payload';
 import { TypeOrmCrudService } from '@nestjsx/crud-typeorm';
 import { IntegrationEntity } from './entity/integration.entity';
-import { UsersType } from '../common/enum/user_type.enum';
+import { UsersTypeEnum } from '../common/enum/user_type.enum';
 
 @Injectable()
 export class UsersService extends TypeOrmCrudService<UserEntity> {
@@ -118,13 +118,13 @@ export class UsersService extends TypeOrmCrudService<UserEntity> {
   }
   async saveUser(
     payload: RegisterPayload,
-    type: UsersType,
+    type: UsersTypeEnum,
     picture: string,
   ): Promise<UserEntity> {
     return await this.userRepository.save(
       this.userRepository.create({
         ...payload,
-        username: payload.username + Date.now().toString(),
+        username: payload.firstname + Date.now().toString(),
         registrationType: type,
         picture: picture,
         // password: hashedPassword,

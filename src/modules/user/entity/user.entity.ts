@@ -1,7 +1,7 @@
 import { Entity, Column, OneToMany } from 'typeorm';
 import { PasswordTransformer } from '../password.transformer';
 import { AppRoles } from '../../common/enum/roles.enum';
-import { UsersType } from 'src/modules/common/enum/user_type.enum';
+import { UsersTypeEnum } from 'src/modules/common/enum/user_type.enum';
 import { IntegrationEntity } from './integration.entity';
 import { CommonEntity } from 'src/modules/common/entity/common';
 
@@ -16,10 +16,16 @@ export class UserEntity extends CommonEntity {
   username: string;
 
   /**
-   * Name column
+   * FirstName column
    */
-  // @Column({ type: 'text' })
-  // name: string;
+  @Column({ length: 255 })
+  firstname: string;
+
+  /**
+   * LastName column
+   */
+  @Column({ length: 255, nullable: true })
+  lastname: string;
 
   /**
    * Email colum
@@ -47,28 +53,32 @@ export class UserEntity extends CommonEntity {
   /**
    * User registration type: email, Facebook, Google, or GitHub
    */
-  @Column({ type: 'enum', enum: UsersType, default: UsersType.PASSWORD })
+  @Column({
+    type: 'enum',
+    enum: UsersTypeEnum,
+    default: UsersTypeEnum.PASSWORD,
+  })
   registrationType: string;
 
   @OneToMany(() => IntegrationEntity, (integration) => integration.byUser)
   integration: IntegrationEntity[];
 
-  // @Column({
-  //   type: 'enum',
-  //   enum: UsersType,
-  //   default: UsersType.PASSWORD,
-  // })
-  // userType: string;
-
   @Column({ type: 'text', nullable: true })
   picture: string;
-
+  /**
+   * Refresh Token
+   */
+  @Column({
+    nullable: true,
+  })
+  // @Exclude()
+  public refreshToken?: string;
   /**
    * Omit password from query selection
    */
   toJSON() {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, ...self } = this;
+    const { password, refreshToken, ...self } = this;
     return self;
   }
 }

@@ -6,7 +6,7 @@ import { ConfigService } from '@nestjs/config';
 
 // Middleware
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy) {
+export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(
     readonly configService: ConfigService,
     private readonly usersService: UsersService,
@@ -14,6 +14,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     //parant constructor methods
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      ignoreExpiration: false,
       secretOrKey: configService.get('JWT_SECRET_KEY'),
     });
   }
@@ -30,7 +31,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException();
     }
 
-    delete user.password;
+    // delete user.password;
     done(null, user);
 
     // attract

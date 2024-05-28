@@ -1,4 +1,4 @@
-export enum UsersType {
+export enum UsersTypeEnum {
   PASSWORD = 'PASSWORD',
-  OAUTH = 'OAUTH',
+  SSO = 'SSO',
 }

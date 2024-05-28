@@ -7,10 +7,10 @@ import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UsersType } from '../common/enum/user_type.enum';
+import { UsersTypeEnum } from '../common/enum/user_type.enum';
 import { ProviderEnum } from '../common/enum/provider.enum';
 import { IntegrationEntity } from '../user/entity/integration.entity';
-import { AuthCallbackPayload } from './payloads/AuthCallback.payload';
+import { AuthCallbackPayload } from './payloads/auth-callback.payload';
 
 @Injectable()
 export class AuthService {
@@ -25,16 +25,23 @@ export class AuthService {
     private readonly integrationRepository: Repository<IntegrationEntity>,
   ) {}
 
-  async createToken(user: UserEntity) {
-    return {
-      expiresIn: this.configService.get<string>('JWT_EXPIRATION_TIME'),
-      accessToken: this.jwtService.sign({ id: user.id }),
-      // user,
-    };
+  // async createToken(user: UserEntity) {
+  //   return {
+  //     expiresIn: this.configService.get<string>('JWT_EXPIRATION_TIME'),
+  //     accessToken: this.jwtService.sign({ id: user.id }),
+  //     // user,
+  //   };
+  // }
+
+  async updateRefreshToken(userId: string, refreshToken: string) {
+    const hashRefreshToken = Hash.make(refreshToken);
+    await this.userRepository.update(userId, {
+      refreshToken: hashRefreshToken,
+    });
   }
 
   async getTokens(userId: string) {
-    const [accessToken] = await Promise.all([
+    const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(
         {
           id: userId,
@@ -44,10 +51,19 @@ export class AuthService {
           expiresIn: this.configService.get('JWT_EXPIRATION_TIME'),
         },
       ),
+      this.jwtService.signAsync(
+        {
+          id: userId,
+        },
+        {
+          secret: this.configService.get<string>('JWT_SECRET_KEY'),
+          expiresIn: this.configService.get('JWT_REFRESH_EXPIRATION_TIME'),
+        },
+      ),
     ]);
     return {
       accessToken: accessToken,
-      // refreshToken: refreshToken,
+      refreshToken: refreshToken,
     };
   }
   async validateUser(payload: LoginPayload): Promise<UserEntity> {
@@ -56,7 +72,7 @@ export class AuthService {
       throw new UnauthorizedException('Username or Password is not correct!');
     }
 
-    if (user.registrationType == UsersType.OAUTH) {
+    if (user.registrationType == UsersTypeEnum.SSO) {
       throw new UnauthorizedException('UAuth User not allowed here!');
     }
     return user;
@@ -104,19 +120,25 @@ export class AuthService {
   //   return this.createToken(newUser);
   // }
 
-  async handleAuthCallback(req, provider: ProviderEnum) {
+  async handleAuthCallback(
+    req,
+    provider: ProviderEnum,
+    usernameField = 'username',
+  ) {
     const user = req.user;
     const exUser = await this.userService.getByEmail(user.email);
-    // const createToken = async () => {
-    //   const tokens = await this.getTokens(exUser.id);
-    //   return tokens;
-    // };
+
+    const createToken = async () => {
+      const tokens = await this.getTokens(exUser.id);
+      await this.updateRefreshToken(exUser.id, tokens.refreshToken);
+      return tokens;
+    };
 
     if (exUser) {
       const integration = await this.userService.getIntegrationById(exUser.id);
 
       if (integration.some((obj) => obj.provider === provider)) {
-        return await this.createToken(exUser);
+        return await createToken();
       }
 
       await this.integrationRepository.save({
@@ -126,17 +148,19 @@ export class AuthService {
       });
 
       // await this.markEmailAsConfirmed(user.email);
-      return await this.createToken(exUser);
+      return await createToken();
     }
 
     const payload: AuthCallbackPayload = {
       email: user.email,
-      username: user.username,
+      firstname: user[usernameField],
+      lastname: ' ',
+      username: user.firstname + user.lastname,
     };
 
     const newUser = await this.userService.saveUser(
       payload,
-      UsersType.OAUTH,
+      UsersTypeEnum.SSO,
       user.picture,
     );
 
@@ -149,6 +173,7 @@ export class AuthService {
     );
 
     const tokens = await this.getTokens(newUser.id);
+    await this.updateRefreshToken(newUser.id, tokens.refreshToken);
     return tokens;
   }
 }

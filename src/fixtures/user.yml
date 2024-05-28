@@ -2,23 +2,18 @@ entity: UserEntity
 items:
   user1:
     username: user
-    name: '{{name.firstName}} {{name.lastName}}'
+    firstname: '{{name.firstName}}'
+    lastname: '{{name.lastName}}'
     password: admin
     roles:
       - ADMIN
-    email: '{{internet.email}}'
-  user2:
-    username: user2
-    name: '{{name.firstName}} {{name.lastName}}'
-    password: admin2
+      - DEFAULT
+    email: 'admin@mt.com'
+  user{2..10}:
+    username: '{{internet.userName}}-{{random.alphaNumeric(5)}}'
+    firstname: '{{name.firstName}}'
+    lastname: '{{name.lastName}}'
+    password: userpassword
     roles:
       - DEFAULT
     email: '{{internet.email}}'
-  user{3..100}:
-    username: '{{internet.userName}}'
-    name: '{{name.firstName}} {{name.lastName}}'
-    password: user123
-    roles:
-      - DEFAULT
-    email: '{{internet.email}}'
-
