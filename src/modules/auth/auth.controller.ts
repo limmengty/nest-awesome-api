@@ -47,7 +47,7 @@ export class AuthController {
   /**
   //  * Login User
   //  * @param payload username, password
-  //  * @return {token} including expire time, jwt token and user info
+  //  * @return { token } including expire time, jwt token and user info
   //  */
   @Public()
   @Post('login')
@@ -57,10 +57,9 @@ export class AuthController {
   async login(@Body() payload: LoginPayload): Promise<any> {
     const user = await this.authService.validateUser(payload);
     const tokens = await this.authService.getTokens(user.id);
-    return await this.authService.updateRefreshToken(
-      user.id,
-      tokens.refreshToken,
-    );
+    console.log(tokens);
+    await this.authService.updateRefreshToken(user.id, tokens.refreshToken);
+    return tokens;
   }
 
   @Public()

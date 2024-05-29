@@ -39,8 +39,8 @@ export class UserController implements CrudController<UserEntity> {
     return this.base.deleteOneBase(req);
   }
 
-  @Roles(AppRoles.ADMINS)
-  @ApiBearerAuth()
+  // @Roles(AppRoles.ADMINS)
+  // @ApiBearerAuth()
   @Override('createOneBase')
   async createOne(
     @ParsedRequest() req: CrudRequest,

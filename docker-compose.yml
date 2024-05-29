@@ -45,5 +45,13 @@ services:
     container_name: mt-redis
     ports:
       - 6379:6379
+  redis-commader:
+    image: rediscommander/redis-commander:latest
+    environment:
+      - REDIS_HOSTS=local:mt-redis:6379
+    ports: 
+      - 8082:8081
+    depends_on:
+      - redis
 volumes:
   postgresdata:

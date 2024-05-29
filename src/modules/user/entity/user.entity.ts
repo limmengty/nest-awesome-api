@@ -4,6 +4,7 @@ import { AppRoles } from '../../common/enum/roles.enum';
 import { UsersTypeEnum } from 'src/modules/common/enum/user_type.enum';
 import { IntegrationEntity } from './integration.entity';
 import { CommonEntity } from 'src/modules/common/entity/common';
+import { ChatEntity } from '../../chat/entity/chat.entity';
 
 @Entity({
   name: 'users',
@@ -62,6 +63,9 @@ export class UserEntity extends CommonEntity {
 
   @OneToMany(() => IntegrationEntity, (integration) => integration.byUser)
   integration: IntegrationEntity[];
+
+  @OneToMany(() => ChatEntity, (chat) => chat.byUser)
+  chat: ChatEntity[];
 
   @Column({ type: 'text', nullable: true })
   picture: string;

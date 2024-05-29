@@ -14,12 +14,12 @@ export class JwtWsAuthGuard extends AuthGuard('jwt') {
   }
   canActivate(context: ExecutionContext): boolean {
     let { token } = context.switchToWs().getClient().handshake.auth;
-    console.log(token);
+    // console.log(token);
     token = token.replace('Bearer ', '');
 
     const decoded = jwt.verify(token, this.configService.get('JWT_SECRET_KEY'));
 
-    console.log(decoded);
+    // console.log(decoded);
     // Logic, validate JWT
     return true;
   }
