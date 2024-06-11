@@ -5,6 +5,7 @@ import { UsersTypeEnum } from 'src/modules/common/enum/user_type.enum';
 import { IntegrationEntity } from './integration.entity';
 import { CommonEntity } from 'src/modules/common/entity/common';
 import { ChatEntity } from '../../chat/entity/chat.entity';
+import { ApiProperty } from '@nestjsx/crud/lib/crud';
 
 @Entity({
   name: 'users',
@@ -13,24 +14,36 @@ export class UserEntity extends CommonEntity {
   /**
    * Unique username column
    */
+  @ApiProperty({
+    required: true,
+    uniqueItems: true,
+    example: 'mengty',
+  })
   @Column({ length: 255, unique: true })
   username: string;
 
   /**
    * FirstName column
    */
+  @ApiProperty()
   @Column({ length: 255 })
   firstname: string;
 
   /**
    * LastName column
    */
+  @ApiProperty()
   @Column({ length: 255, nullable: true })
   lastname: string;
 
   /**
    * Email colum
    */
+  @ApiProperty({
+    required: true,
+    uniqueItems: true,
+    example: '@gmail.com',
+  })
   @Column({ type: 'text', unique: true })
   email: string;
 
@@ -44,6 +57,11 @@ export class UserEntity extends CommonEntity {
   /**
    * Password column
    */
+  @ApiProperty({
+    required: true,
+    uniqueItems: true,
+    example: '11111111',
+  })
   @Column({
     name: 'password',
     length: 255,
@@ -64,7 +82,7 @@ export class UserEntity extends CommonEntity {
   @OneToMany(() => IntegrationEntity, (integration) => integration.byUser)
   integration: IntegrationEntity[];
 
-  @OneToMany(() => ChatEntity, (chat) => chat.byUser)
+  @OneToMany(() => ChatEntity, (chat) => chat.byUserId)
   chat: ChatEntity[];
 
   @Column({ type: 'text', nullable: true })

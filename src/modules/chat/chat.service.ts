@@ -3,15 +3,18 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ChatEntity } from './entity/chat.entity';
 import { Repository } from 'typeorm';
 import { UserEntity } from '../user';
+import { TypeOrmCrudService } from '@nestjsx/crud-typeorm';
 
 @Injectable()
-export class ChatService {
+export class ChatService extends TypeOrmCrudService<ChatEntity> {
   constructor(
     @InjectRepository(ChatEntity)
-    private readonly chatRepository: Repository<ChatEntity>,
+    private chatRepository: Repository<ChatEntity>,
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
-  ) {}
+  ) {
+    super(chatRepository);
+  }
   async getChatById(id: string): Promise<ChatEntity[]> {
     return await this.chatRepository
       .createQueryBuilder('chat')
@@ -19,9 +22,15 @@ export class ChatService {
       .orderBy('chat.created_at')
       .getMany();
   }
-  async getOne(userId: string) {
+  async getOneById(userId: string) {
     const user = await this.userRepository.findOne({
       id: userId,
+    });
+    return user;
+  }
+  async getOneByUsername(username: string) {
+    const user = await this.userRepository.findOne({
+      username: username,
     });
     return user;
   }
@@ -29,13 +38,17 @@ export class ChatService {
     createMessaage: ChatEntity,
     userId: string,
   ): Promise<ChatEntity> {
-    const user = await this.getOne(userId);
-    console.log(user);
+    const user = await this.userRepository.findOne(userId);
+    console.log('userid', user);
     return await this.chatRepository.save(
       this.chatRepository.create({
         ...createMessaage,
-        byUser: user.id,
+        byUserId: user,
       }),
     );
+  }
+
+  async findAllUsersWithMessages(): Promise<UserEntity[]> {
+    return this.userRepository.find({ relations: ['chat'] });
   }
 }

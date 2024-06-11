@@ -1,5 +1,7 @@
-import { Logger, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Logger, Request, UseGuards, UseInterceptors } from '@nestjs/common';
 import {
+  ConnectedSocket,
+  MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
   OnGatewayInit,
@@ -14,7 +16,6 @@ import { TimeoutInterceptor } from '../common/interceptor/timeout.interceptor';
 import { ChatEntity } from './entity/chat.entity';
 import { ChatService } from './chat.service';
 import { Socket } from 'socket.io';
-import { UUIDType } from '../common/validator/FindOneUUID.validator';
 
 @WebSocketGateway({ cors: true })
 export class ChatGateWay
@@ -40,7 +41,7 @@ export class ChatGateWay
   // @UseGuards(JwtWsAuthGuard)
   // @SubscribeMessage('send-message')
   // async handleMessage(client: any, payload: ChatEntity): Promise<void> {
-  //   this.logger.log(`client id: ${client.id} connected`);
+  //   this.logger.log(`client id: ${client.id}  connected`);
   //   this.chatService.create(payload);
   //   this.io.emit('re-message', payload);
   //   this.logger.log(payload);
@@ -49,8 +50,13 @@ export class ChatGateWay
   @UseInterceptors(new LoggingInterceptor())
   @UseGuards(JwtWsAuthGuard)
   @SubscribeMessage('send-message')
-  async handleMessage(client: Socket, payload: ChatEntity): Promise<void> {
-    await this.chatService.create(payload, client.handshake.auth.id);
+  async handleMessage(
+    @ConnectedSocket() client: any,
+    @MessageBody() payload: ChatEntity,
+  ): Promise<void> {
+    const user = client.data;
+    console.log(user);
+    await this.chatService.create(payload, user.id);
     this.io.emit('re-message', payload);
   }
 }

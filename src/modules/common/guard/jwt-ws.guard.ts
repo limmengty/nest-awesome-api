@@ -1,8 +1,13 @@
-import { ExecutionContext, Injectable } from '@nestjs/common';
+import {
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Reflector } from '@nestjs/core';
-import jwt = require('jsonwebtoken');
 import { ConfigService } from '@nestjs/config';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const jwt = require('jsonwebtoken');
 // Protected to route
 @Injectable()
 export class JwtWsAuthGuard extends AuthGuard('jwt') {
@@ -14,13 +19,14 @@ export class JwtWsAuthGuard extends AuthGuard('jwt') {
   }
   canActivate(context: ExecutionContext): boolean {
     let { token } = context.switchToWs().getClient().handshake.auth;
-    // console.log(token);
     token = token.replace('Bearer ', '');
-
-    const decoded = jwt.verify(token, this.configService.get('JWT_SECRET_KEY'));
-
-    // console.log(decoded);
-    // Logic, validate JWT
-    return true;
+    if (!token) {
+      throw new UnauthorizedException('Token not found');
+    }
+    const decoded = jwt.verify(token, this.configService.get('JWT_SECRET_KEY')); // Replace with your secret key
+    if (decoded) {
+      return true;
+    }
+    return false;
   }
 }

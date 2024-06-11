@@ -1,4 +1,4 @@
-import { Controller } from '@nestjs/common';
+import { CacheTTL, Controller } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UsersService } from './user.service';
 import {
@@ -14,6 +14,8 @@ import { UserEntity } from './entity/user.entity';
 import { AppRoles } from '../common/enum/roles.enum';
 import { Roles } from '../common/decorator/roles.decorator';
 import { Public } from '../common/decorator/public.decorator';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { NoCache } from '../common/decorator/no-cache.decorator';
 @Crud({
   model: {
     type: UserEntity,
@@ -26,7 +28,10 @@ export class UserController implements CrudController<UserEntity> {
    * User controller constructor
   //  * @param userService user service
    */
-  constructor(public service: UsersService) {}
+  constructor(
+    public service: UsersService,
+    private readonly eventEmitter: EventEmitter2,
+  ) {}
 
   get base(): CrudController<UserEntity> {
     return this;
@@ -41,14 +46,15 @@ export class UserController implements CrudController<UserEntity> {
 
   // @Roles(AppRoles.ADMINS)
   // @ApiBearerAuth()
+  @NoCache()
   @Override('createOneBase')
   async createOne(
     @ParsedRequest() req: CrudRequest,
     @ParsedBody() dto: UserEntity,
   ) {
-    // const user = await this.base.createOneBase(req, dto);
-    // return user;
-    return this.base.createOneBase(req, dto);
+    const user = this.base.createOneBase(req, dto);
+    this.eventEmitter.emit('user.created', user);
+    return user;
   }
   @ApiBearerAuth()
   @Override()
@@ -69,6 +75,7 @@ export class UserController implements CrudController<UserEntity> {
   }
 
   @Public()
+  @CacheTTL(60) //spacil case
   @Override('getManyBase')
   async getManyBaseUser(@ParsedRequest() req: CrudRequest) {
     return this.base.getManyBase(req);

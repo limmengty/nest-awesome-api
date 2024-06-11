@@ -14,7 +14,7 @@ import {
   ApiUnauthorizedResponse,
   ApiOkResponse,
 } from '@nestjs/swagger';
-import { UsersService } from '../user';
+import { UserEntity, UsersService } from '../user';
 import { Public } from '../common/decorator/public.decorator';
 import { AuthService } from './auth.service';
 import { LoginPayload } from './payloads/login.payload';
@@ -49,6 +49,7 @@ export class AuthController {
   //  * @param payload username, password
   //  * @return { token } including expire time, jwt token and user info
   //  */
+  @NoCache()
   @Public()
   @Post('login')
   @ApiResponse({ status: 201, description: 'Successful Login' })
@@ -57,11 +58,11 @@ export class AuthController {
   async login(@Body() payload: LoginPayload): Promise<any> {
     const user = await this.authService.validateUser(payload);
     const tokens = await this.authService.getTokens(user.id);
-    console.log(tokens);
     await this.authService.updateRefreshToken(user.id, tokens.refreshToken);
     return tokens;
   }
 
+  @NoCache()
   @Public()
   @Get('login-google')
   loginGoogle(@Res() response: Response): any {
@@ -70,6 +71,7 @@ export class AuthController {
     const uri = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${client_id}&redirect_uri=${google_callback}&response_type=code&scope=profile email`;
     response.redirect(uri);
   }
+  @NoCache()
   @Public()
   @Get('login-github')
   loginGithub(@Res() response: Response): any {
@@ -81,6 +83,7 @@ export class AuthController {
     response.redirect(uri);
   }
 
+  @NoCache()
   @Public()
   @Get('login-facebook')
   facebookGithub(@Res() response: Response): any {
@@ -88,7 +91,7 @@ export class AuthController {
     const facebook_callback = this.configService.get<string>(
       'FACEBOOK_CALLBACK_URL',
     );
-    const uri = `https://www.facebook.com/v4.0/dialog/oauth?${client_id}&redirect_uri=${facebook_callback}&response_type=code&scope=email&auth_type=rerequest&display=popup`;
+    const uri = `https://www.facebook.com/v20.0/dialog/oauth?${client_id}&redirect_uri=${facebook_callback}&auth_type=rerequest&scope=email`;
     response.redirect(uri);
   }
 
@@ -103,6 +106,7 @@ export class AuthController {
   //   // return request.user;
   // }
 
+  @NoCache()
   @Public()
   @UseGuards(GoogleOAuthGuard)
   @Get('google/callback')
@@ -113,6 +117,8 @@ export class AuthController {
       'firstname',
     );
   }
+
+  @NoCache()
   @Public()
   @UseGuards(GithubOAuthGuard)
   @Get('github/callback')
@@ -120,6 +126,7 @@ export class AuthController {
     return this.authService.handleAuthCallback(req, ProviderEnum.GITHUB);
   }
 
+  @NoCache()
   @Public()
   @UseGuards(FacebookGuard)
   @Get('facebook/callback')
@@ -136,6 +143,7 @@ export class AuthController {
    * @param payload change password payload
    */
   @Public()
+  @NoCache()
   @Post('changePassword')
   @ApiResponse({ status: 201, description: 'Successful Reset' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
@@ -149,6 +157,7 @@ export class AuthController {
    * Register user
    * @param payload register payload
    */
+  @NoCache()
   @ApiBearerAuth()
   @Post('register')
   @ApiResponse({ status: 201, description: 'Successful Registration' })

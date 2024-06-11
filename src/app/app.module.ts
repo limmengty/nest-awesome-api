@@ -2,7 +2,7 @@ import { CacheModule, Module } from '@nestjs/common';
 import { TypeOrmModule, TypeOrmModuleAsyncOptions } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 import { TimeoutInterceptor } from '../modules/common/interceptor/timeout.interceptor';
 import * as redisStore from 'cache-manager-redis-store';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -10,10 +10,11 @@ import { CommonModule } from '../modules/common/common.module';
 import { AuthModule } from '../modules/auth/auth.module';
 import { UserModule } from '../modules/user';
 import { LoggingInterceptor } from '../modules/common/interceptor/logging.interceptor';
-import { RolesGuard } from '../modules/common/guard/roles.guard';
 import { BookModule } from 'src/modules/books/book.module';
 import { ChatModule } from 'src/modules/chat/chat.module';
-import { JwtAuthGuard } from 'src/modules/common/guard/jwt.guard';
+import { NoCacheInterceptor } from 'src/modules/common/interceptor/no-cache.interceptor';
+import { ScheduleModule } from '@nestjs/schedule';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -84,6 +85,8 @@ import { JwtAuthGuard } from 'src/modules/common/guard/jwt.guard';
         }
       },
     }),
+    EventEmitterModule.forRoot(),
+    ScheduleModule.forRoot(),
     AuthModule,
     BookModule,
     UserModule,
@@ -105,6 +108,10 @@ import { JwtAuthGuard } from 'src/modules/common/guard/jwt.guard';
     {
       provide: APP_INTERCEPTOR,
       useClass: TimeoutInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: NoCacheInterceptor,
     },
     {
       provide: APP_INTERCEPTOR,

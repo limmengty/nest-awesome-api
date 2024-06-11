@@ -12,13 +12,14 @@ import { GoogleStrategy } from '../common/strategy/google-strategy';
 import { IntegrationEntity } from '../user/entity/integration.entity';
 import { RefreshTokenStrategy } from '../common/strategy/refresh-token.strategy';
 import { GithubStrategy } from '../common/strategy/github.strategy';
+import { ChatEntity } from '../chat/entity/chat.entity';
 
 @Module({
   imports: [
     UserModule,
     HttpModule,
     ConfigModule,
-    TypeOrmModule.forFeature([UserEntity, IntegrationEntity]),
+    TypeOrmModule.forFeature([UserEntity, IntegrationEntity, ChatEntity]),
     JwtModule.register({}),
     // PassportModule.register({ defaultStrategy: 'jwt' }),
     // JwtModule.registerAsync({

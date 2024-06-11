@@ -18,7 +18,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile-nginx
-    container_name: mt-nest-nginx
+    container_name: mt-nest-api-nginx
     depends_on:
       - nest
     environment:
@@ -31,7 +31,7 @@ services:
       - 81:80
   db:
     image: postgres:12
-    container_name: mt-nest-db
+    container_name: mt-nest-api-db
     environment:
       POSTGRES_DB: nest
       POSTGRES_USER: nest
@@ -42,13 +42,13 @@ services:
       - postgresdata:/var/lib/postgresql
   redis:
     image: redis:5
-    container_name: mt-redis
+    container_name: mt-api-redis
     ports:
       - 6379:6379
   redis-commader:
     image: rediscommander/redis-commander:latest
     environment:
-      - REDIS_HOSTS=local:mt-redis:6379
+      - REDIS_HOSTS=local:mt-api-redis:6379
     ports: 
       - 8082:8081
     depends_on:

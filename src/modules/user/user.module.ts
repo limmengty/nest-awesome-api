@@ -8,6 +8,8 @@ import { UserGateWay } from './user.getway';
 import { IntegrationEntity } from './entity/integration.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { ChatEntity } from '../chat/entity/chat.entity';
+import { UserNotification } from './user.notification';
+import { UserEvent } from './user.event';
 
 @Module({
   imports: [
@@ -17,6 +19,6 @@ import { ChatEntity } from '../chat/entity/chat.entity';
   ],
   exports: [UsersService],
   controllers: [UserController],
-  providers: [UsersService, UserGateWay],
+  providers: [UsersService, UserGateWay, UserNotification, UserEvent],
 })
 export class UserModule {}
