@@ -27,12 +27,14 @@ CrudConfigService.load({
 
 import { AppModule } from './app/app.module';
 import { RedisIoAdapter } from './modules/common/adapter/ws.adapter';
+import * as helmet from 'helmet';
 // import { RedisIoAdapter } from './modules/common/adapter/ws.adapter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const redisIoAdapter = new RedisIoAdapter(app);
   await redisIoAdapter.connectToRedis();
+  app.use(helmet());
   setupSwagger(app);
   // Enable Cors for development
   app.enableCors();

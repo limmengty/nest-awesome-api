@@ -2,7 +2,7 @@ import { CacheModule, Module } from '@nestjs/common';
 import { TypeOrmModule, TypeOrmModuleAsyncOptions } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { TimeoutInterceptor } from '../modules/common/interceptor/timeout.interceptor';
 import * as redisStore from 'cache-manager-redis-store';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -15,6 +15,8 @@ import { ChatModule } from 'src/modules/chat/chat.module';
 import { NoCacheInterceptor } from 'src/modules/common/interceptor/no-cache.interceptor';
 import { ScheduleModule } from '@nestjs/schedule';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerStorageRedisService } from 'nestjs-throttler-storage-redis';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -58,6 +60,18 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
           } as TypeOrmModuleAsyncOptions;
         }
       },
+    }),
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        ttl: config.get<number>('RATE_LIMIT_TTL'),
+        limit: config.get<number>('RATE_LIMIT_ITEM'),
+        storage: new ThrottlerStorageRedisService({
+          host: config.get<string>('CACHE_HOST'),
+          port: config.get<number>('CACHE_PORT'),
+        }),
+      }),
     }),
     CacheModule.registerAsync({
       imports: [ConfigModule],
@@ -105,6 +119,10 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     //   provide: APP_GUARD,
     //   useClass: RolesGuard,
     // },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
     {
       provide: APP_INTERCEPTOR,
       useClass: TimeoutInterceptor,

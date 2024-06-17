@@ -52,3 +52,4 @@ export class ChatService extends TypeOrmCrudService<ChatEntity> {
     return this.userRepository.find({ relations: ['chat'] });
   }
 }
+  

@@ -25,13 +25,13 @@ export class AuthService {
     private readonly integrationRepository: Repository<IntegrationEntity>,
   ) {}
 
-  // async createToken(user: UserEntity) {
-  //   return {
-  //     expiresIn: this.configService.get<string>('JWT_EXPIRATION_TIME'),
-  //     accessToken: this.jwtService.sign({ id: user.id }),
-  //     // user,
-  //   };
-  // }
+  async createToken(user: UserEntity) {
+    return {
+      expiresIn: this.configService.get<string>('JWT_EXPIRATION_TIME'),
+      accessToken: this.jwtService.sign({ id: user.id }),
+      // user,
+    };
+  }
 
   async updateRefreshToken(userId: string, refreshToken: string) {
     const hashRefreshToken = Hash.make(refreshToken);
