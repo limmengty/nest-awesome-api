@@ -1,6 +1,6 @@
-import { CommonEntity } from 'src/modules/common/entity/common';
-import { UserEntity } from 'src/modules/user';
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
+import { CommonEntity } from '../../common/entity/common';
+import { UserEntity } from '../../user/entity/user.entity';
 @Entity({
   name: 'chats',
 })
@@ -12,7 +12,7 @@ export class ChatEntity extends CommonEntity {
   username: string;
 
   @Index()
-  @ManyToOne(() => UserEntity, (user) => user.chat)
+  @ManyToOne(() => UserEntity, (user) => user.chat, { nullable: true })
   @JoinColumn({ name: 'byUserId' })
   byUserId: UserEntity;
 }

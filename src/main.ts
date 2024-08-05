@@ -7,6 +7,7 @@ import { CrudConfigService } from '@nestjsx/crud';
 CrudConfigService.load({
   query: {
     limit: 10,
+    alwaysPaginate: true,
   },
   params: {
     id: {
@@ -24,9 +25,9 @@ CrudConfigService.load({
     },
   },
 });
-
 import { AppModule } from './app/app.module';
 import { RedisIoAdapter } from './modules/common/adapter/ws.adapter';
+// import helmet from 'helmet';
 import * as helmet from 'helmet';
 // import { RedisIoAdapter } from './modules/common/adapter/ws.adapter';
 

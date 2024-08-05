@@ -8,6 +8,7 @@ items:
     roles:
       - ADMIN
     email: user@gmail.com
+    discount: '@discount($current)'
   user2:
     username: user2
     firstname: user2
@@ -16,12 +17,16 @@ items:
     roles:
       - DEFAULT
     email: user2@gmail.com
-  # user{3..100}:
-  #   username: 'user-{{random.alphaNumeric(5)}}'
-  #   firstname: '{{name.firstName}}'
-  #   lastname: '{{name.lastName}}'
-  #   password: admin123
-  #   roles:
-  #     - DEFAULT
-  #   email: '{{internet.email}}'
+    discount: '@discount($current)'
+
+  user{3..100}:
+    username: '{{internet.userName}}'
+    firstname: '{{name.firstName}}'
+    lastname: '{{name.lastName}}'
+    password: admin123
+    roles:
+      - DEFAULT
+    email: '{{internet.email}}'
+    discount: '@discount($current)'
+
 

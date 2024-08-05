@@ -37,3 +37,4 @@ upload
 # environment
 .env
 .idea/
+.env.local.prod

@@ -1,6 +1,7 @@
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, ManyToOne } from 'typeorm';
 import { ApiProperty } from '@nestjsx/crud/lib/crud';
-import { CommonEntity } from 'src/modules/common/entity/common';
+import { UserEntity } from '../../user/entity/user.entity'; //import like this is necessary for fixture generate
+import { CommonEntity } from '../../common/entity/common';
 
 @Entity({ name: 'books' })
 export class BookEntity extends CommonEntity {
@@ -12,11 +13,18 @@ export class BookEntity extends CommonEntity {
   @Column()
   dateOfPublished: string;
 
-  @ApiProperty()
-  @Column({ nullable: true })
-  author: string;
+  @ManyToOne(() => UserEntity, (user) => user.books, { nullable: true })
+  byUser: string;
 
   @ApiProperty()
   @Column({ nullable: true })
   category: string;
+
+  @ApiProperty()
+  @Column({ nullable: true })
+  isbn: string;
+
+  @ApiProperty()
+  @Column({ nullable: true })
+  doi: string;
 }

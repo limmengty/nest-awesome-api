@@ -1,6 +1,10 @@
 const dotenv = require('dotenv');
 
-dotenv.config();
+dotenv.config({
+  path: __dirname + '/.env.local.prod',
+});
+
+console.log(__dirname + '/dist/modules/**/*.entity.js');
 
 const {
   DB_TYPE,
@@ -11,7 +15,7 @@ const {
   DB_DATABASE,
   DB_SYNC,
 } = process.env;
-console.log(DB_TYPE);
+
 module.exports = {
   type: DB_TYPE,
   host: DB_HOST,
@@ -19,8 +23,8 @@ module.exports = {
   username: DB_USERNAME,
   password: DB_PASSWORD,
   database: DB_DATABASE,
-  migrations: [__dirname + '/src/migrations/*{.ts,.js}'],
-  entities: [__dirname + '/src/**/*.entity.{ts,js}'],
-  subscribers: [__dirname + '/src/**/*.subscriber.{ts,js}'],
+  migrations: [__dirname + '/dist/migrations/*{.js}'],
+  entities: [__dirname + '/dist/modules/**/*.entity.js'],
+  subscribers: [__dirname + '/dist/**/*.subscriber.js'],
   synchronize: DB_SYNC,
 };

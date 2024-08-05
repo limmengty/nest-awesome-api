@@ -1,0 +1,8 @@
+books:
+  steps:
+    - name: GET all books
+      http:
+        url: http://${{env.host}}/books
+        method: GET
+        check:
+          status: /^20/

@@ -13,6 +13,7 @@ import { IntegrationEntity } from '../user/entity/integration.entity';
 import { RefreshTokenStrategy } from '../common/strategy/refresh-token.strategy';
 import { GithubStrategy } from '../common/strategy/github.strategy';
 import { ChatEntity } from '../chat/entity/chat.entity';
+import EmailEvent from './events/email.event';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { ChatEntity } from '../chat/entity/chat.entity';
     GoogleStrategy,
     RefreshTokenStrategy,
     GithubStrategy,
+    EmailEvent,
   ],
   // exports: [PassportModule.register({ defaultStrategy: 'jwt' })],
 })

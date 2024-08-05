@@ -1,15 +1,15 @@
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
 import { ProviderEnum } from '../../common/enum/provider.enum';
-import { UserEntity } from './user.entity';
-import { CommonEntity } from 'src/modules/common/entity/common';
+import { CommonEntity } from '../../common/entity/common';
+import { UserEntity } from '../entity/user.entity';
 
 @Entity({
   name: 'integration',
 })
 export class IntegrationEntity extends CommonEntity {
   @Index()
-  @ManyToOne(() => UserEntity, (user) => user.integration)
-  @JoinColumn({ name: 'byUserId' })
+  @ManyToOne(() => UserEntity, (user) => user.integration, { nullable: true })
+  // @JoinColumn({ name: 'byUserId' })
   byUser: string;
 
   @Column({ type: 'text', unique: true })

@@ -1,4 +1,4 @@
-<!-- <p align="center">
+<p align="center">
   <a href="https://www.youtube.com/c/TeachingForDevelopment" target="_blank" rel="noopener noreferrer"><img src="https://i.imgur.com/SZqGIpL.png" width="80" alt="TFD Logo" /></a>
 </p>
 
@@ -116,4 +116,4 @@ You can also donate with **Visa Direct**.
 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Visa.svg/1200px-Visa.svg.png" width="120" alt="TFD Logo" />
 
 #### 4026 4503 2163 1102
- -->
+

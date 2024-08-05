@@ -1,8 +1,7 @@
 entity: BookEntity
-items:
-  book{1..200}:
+items: 
+  book{1..1000}:
     title: '{{internet.userName}}'
-    dateOfPublished: '{{datatype.datetime}}'
-    author: '{{internet.userName}}'
-    category: '{{hacker.noun}}'
-
+    dateOfPublished: '{{date.between}}'
+    # byUser: '@user*'
+    category: '{{music.genre}}'

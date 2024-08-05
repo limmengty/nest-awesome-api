@@ -1,4 +1,12 @@
-import { CacheTTL, Controller } from '@nestjs/common';
+import {
+  Body,
+  CacheTTL,
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Post,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UsersService } from './user.service';
 import {
@@ -16,13 +24,21 @@ import { Roles } from '../common/decorator/roles.decorator';
 import { Public } from '../common/decorator/public.decorator';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { NoCache } from '../common/decorator/no-cache.decorator';
+import { BookPayload } from './payloads/book.payload';
 @Crud({
   model: {
     type: UserEntity,
   },
+  query: {
+    join: {
+      books: {
+        eager: true,
+      },
+    },
+  },
 })
 @Controller('api/v1/user')
-@ApiTags('User')
+@ApiTags('Users')
 export class UserController implements CrudController<UserEntity> {
   /**
    * User controller constructor
@@ -47,6 +63,7 @@ export class UserController implements CrudController<UserEntity> {
   // @Roles(AppRoles.ADMINS)
   // @ApiBearerAuth()
   @NoCache()
+  @Public()
   @Override('createOneBase')
   async createOne(
     @ParsedRequest() req: CrudRequest,
@@ -85,5 +102,20 @@ export class UserController implements CrudController<UserEntity> {
   @Override('getOneBase')
   getOneAndDoStuff(@ParsedRequest() req: CrudRequest) {
     return this.base.getOneBase(req);
+  }
+
+  @Public()
+  @Get(':id/books')
+  async getBooks(@Param('id') id: string) {
+    return this.service.getBookByUserID(id);
+  }
+  @Public()
+  @Post(':id/books')
+  async createBookByUserId(
+    @Param('id') id: string,
+    @Body() payload: BookPayload,
+  ) {
+    const newPayload = { byUser: id, ...payload };
+    return this.service.createBookByUserId(newPayload);
   }
 }

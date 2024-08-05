@@ -13,13 +13,14 @@ import {
   ApiBearerAuth,
   ApiUnauthorizedResponse,
   ApiOkResponse,
+  ApiOperation,
+  ApiForbiddenResponse,
 } from '@nestjs/swagger';
-import { UserEntity, UsersService } from '../user';
+import { UsersService } from '../user';
 import { Public } from '../common/decorator/public.decorator';
 import { AuthService } from './auth.service';
 import { LoginPayload } from './payloads/login.payload';
 import { ResetPayload } from './payloads/reset.payload';
-import { RegisterPayload } from './payloads/register.payload';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
 import { GoogleOAuthGuard } from '../common/guard/google.oauth.guard';
@@ -29,9 +30,11 @@ import RequestWithUser from '../common/interface/request-with-user.interface';
 import { NoCache } from '../common/decorator/no-cache.decorator';
 import { GithubOAuthGuard } from '../common/guard/github.oauth.guard';
 import { FacebookGuard } from '../common/guard/facebook.guard';
+import { RegisterEmailPayload } from './payloads/register-email.payload';
+import { I18n, I18nContext } from 'nestjs-i18n';
 
 @Controller('api/v1/auth')
-@ApiTags('Authentication')
+@ApiTags('Auth')
 export class AuthController {
   /**
    * Constructor
@@ -153,18 +156,34 @@ export class AuthController {
     return user.toJSON();
   }
 
-  /**
-   * Register user
-   * @param payload register payload
-   */
-  @NoCache()
-  @ApiBearerAuth()
-  @Post('register')
-  @ApiResponse({ status: 201, description: 'Successful Registration' })
-  @ApiResponse({ status: 400, description: 'Bad Request' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async register(@Body() payload: RegisterPayload): Promise<any> {
-    return await this.userService.create(payload);
+  // /**
+  //  * Register user
+  //  * @param payload register payload
+  //  */
+  // @NoCache()
+  // @ApiBearerAuth()
+  // @Public()
+  // @Post('register')
+  // @ApiResponse({ status: 201, description: 'Successful Registration' })
+  // @ApiResponse({ status: 400, description: 'Bad Request' })
+  // @ApiResponse({ status: 401, description: 'Unauthorized' })
+  // async register(@Body() payload: RegisterPayload): Promise<any> {
+  //   return await this.userService.create(payload);
+  // }
+
+  @Public()
+  @Post('/register')
+  @ApiOperation({ summary: 'Register a user and send mail verification' })
+  @ApiForbiddenResponse({
+    status: 403,
+    description: 'Forbidden',
+    // type: ForbiddenDto,
+  })
+  async registerUser(
+    @Body() payload: RegisterEmailPayload,
+    @I18n() i18n: I18nContext,
+  ) {
+    return this.authService.register(payload, i18n);
   }
 
   /**

@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Hash } from '../../utils/Hash';
 import { UserEntity, UsersService } from '../user';
@@ -11,6 +15,9 @@ import { UsersTypeEnum } from '../common/enum/user_type.enum';
 import { ProviderEnum } from '../common/enum/provider.enum';
 import { IntegrationEntity } from '../user/entity/integration.entity';
 import { AuthCallbackPayload } from './payloads/auth-callback.payload';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { RegisterEmailPayload } from './payloads/register-email.payload';
+import { I18nContext } from 'nestjs-i18n';
 
 @Injectable()
 export class AuthService {
@@ -23,15 +30,16 @@ export class AuthService {
     private readonly userRepository: Repository<UserEntity>,
     @InjectRepository(IntegrationEntity)
     private readonly integrationRepository: Repository<IntegrationEntity>,
+    private eventEmitter: EventEmitter2,
   ) {}
 
-  async createToken(user: UserEntity) {
-    return {
-      expiresIn: this.configService.get<string>('JWT_EXPIRATION_TIME'),
-      accessToken: this.jwtService.sign({ id: user.id }),
-      // user,
-    };
-  }
+  // async createToken(user: UserEntity) {
+  //   return {
+  //     expiresIn: this.configService.get<string>('JWT_EXPIRATION_TIME'),
+  //     accessToken: this.jwtService.sign({ id: user.id }),
+  //     // user,
+  //   };
+  // }
 
   async updateRefreshToken(userId: string, refreshToken: string) {
     const hashRefreshToken = Hash.make(refreshToken);
@@ -175,5 +183,44 @@ export class AuthService {
     const tokens = await this.getTokens(newUser.id);
     await this.updateRefreshToken(newUser.id, tokens.refreshToken);
     return tokens;
+  }
+
+  async register(payload: RegisterEmailPayload, i18n: I18nContext) {
+    // const users = await this.userRepository.find({
+    //   // Apply or where condition
+    //   where: [{ email: payload.email }],
+    // });
+    const email = payload.email;
+    const user = await this.userRepository
+      .createQueryBuilder('user')
+      .where('LOWER(user.email) = LOWER(:email)', { email })
+      .getOne();
+    if (user) {
+      throw new BadRequestException(i18n.t('error.user_already_existed'));
+    }
+    // const hashedPassword = Hash.make(payload.password);
+    const final = await this.userService.saveUser(
+      payload,
+      UsersTypeEnum.PASSWORD,
+      null,
+    );
+    /**
+     * Create and Persist Refresh Token
+     */
+    const tokens = await this.getTokens(final.id);
+    await this.updateRefreshToken(final.id, tokens.refreshToken);
+    /**
+     * Send Email to User for Confirmation
+     */
+    this.eventEmitter.emit('user.registered', {
+      fullName: final.firstname + ' ' + final.lastname,
+      email: final.email,
+      lang: i18n.lang,
+    });
+    return tokens;
+  }
+
+  async logout(userId: string) {
+    return this.userRepository.update(userId, { refreshToken: null });
   }
 }

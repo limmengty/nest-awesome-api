@@ -1,0 +1,15 @@
+FROM node:16.20.2
+
+WORKDIR /app
+ENV NODE_ENV local.prod
+COPY package.json yarn.lock ./
+RUN yarn install
+
+COPY . .
+
+EXPOSE 3000
+
+RUN yarn add @nestjs/cli@8.0.0
+RUN yarn build
+
+CMD [ "yarn", "start:prod" ]

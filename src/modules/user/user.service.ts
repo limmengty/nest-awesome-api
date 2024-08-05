@@ -19,6 +19,8 @@ import { RegisterPayload } from '../auth/payloads/register.payload';
 import { TypeOrmCrudService } from '@nestjsx/crud-typeorm';
 import { IntegrationEntity } from './entity/integration.entity';
 import { UsersTypeEnum } from '../common/enum/user_type.enum';
+import { BookEntity } from '../books/entity/book.entity';
+import { BookPayload } from './payloads/book.payload';
 
 @Injectable()
 export class UsersService extends TypeOrmCrudService<UserEntity> {
@@ -27,6 +29,8 @@ export class UsersService extends TypeOrmCrudService<UserEntity> {
     private readonly userRepository: Repository<UserEntity>,
     @InjectRepository(IntegrationEntity)
     private readonly integrationRepository: Repository<IntegrationEntity>,
+    @InjectRepository(BookEntity)
+    private readonly bookRepository: Repository<BookEntity>,
   ) {
     super(userRepository);
   }
@@ -139,4 +143,36 @@ export class UsersService extends TypeOrmCrudService<UserEntity> {
   //     }),
   //   );
   // }
+
+  // async getBookByUserID(@Param('id') id: string) {
+  //   const book = this.bookRepository.find({
+  //     where: {
+  //       byUser: id,
+  //     },
+  //   });
+  //   return book;
+  // }
+
+  async getBookByUserID(id: string) {
+    const books = await this.userRepository.find({
+      id: id,
+    });
+    return books;
+  }
+
+  async createBookByUserId(payload: BookPayload & { byUser: string }) {
+    const newBooks = await this.bookRepository.save(
+      this.bookRepository.create(payload),
+    );
+
+    const user = await this.userRepository.findOne(payload.byUser);
+    console.log(user);
+    if (user) {
+      // user.books = [];
+      user.books.push(newBooks.id);
+      await this.userRepository.save(user);
+    }
+
+    return newBooks;
+  }
 }

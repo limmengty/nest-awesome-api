@@ -10,10 +10,16 @@ import { JwtModule } from '@nestjs/jwt';
 import { ChatEntity } from '../chat/entity/chat.entity';
 import { UserNotification } from './user.notification';
 import { UserEvent } from './user.event';
+import { BookEntity } from '../books/entity/book.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UserEntity, IntegrationEntity, ChatEntity]),
+    TypeOrmModule.forFeature([
+      UserEntity,
+      IntegrationEntity,
+      ChatEntity,
+      BookEntity,
+    ]),
     // PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({}),
   ],

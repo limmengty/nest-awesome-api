@@ -1,6 +1,12 @@
-import { Controller } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Req,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
 import { BookService } from './book.service';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import {
   CreateManyDto,
   Crud,
@@ -14,13 +20,15 @@ import { BookEntity } from './entity/book.entity';
 import { AppRoles } from '../common/enum/roles.enum';
 import { Roles } from '../common/decorator/roles.decorator';
 import { Public } from '../common/decorator/public.decorator';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Request } from 'express';
 
 @Crud({
   model: {
     type: BookEntity,
   },
 })
-@Controller('books')
+@Controller('api/v1/books')
 @ApiTags('Books')
 export class BookController implements CrudController<BookEntity> {
   constructor(public service: BookService) {}
@@ -70,5 +78,29 @@ export class BookController implements CrudController<BookEntity> {
   @Override('getOneBase')
   getOneAndDoStuff(@ParsedRequest() req: CrudRequest) {
     return this.base.getOneBase(req);
+  }
+
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @Post('upload')
+  @Public()
+  @UseInterceptors(
+    FileInterceptor('file', {
+      dest: './upload',
+    }),
+  )
+  updloadFile(@UploadedFile() file: Express.Multer.File) {
+    // upload logic
+    console.log(file);
   }
 }

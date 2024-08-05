@@ -1,11 +1,13 @@
-import { Entity, Column, OneToMany } from 'typeorm';
+import { Entity, Column, OneToMany, OneToOne, JoinColumn } from 'typeorm';
 import { PasswordTransformer } from '../password.transformer';
 import { AppRoles } from '../../common/enum/roles.enum';
-import { UsersTypeEnum } from 'src/modules/common/enum/user_type.enum';
-import { IntegrationEntity } from './integration.entity';
-import { CommonEntity } from 'src/modules/common/entity/common';
-import { ChatEntity } from '../../chat/entity/chat.entity';
+import { UsersTypeEnum } from '../../common/enum/user_type.enum';
 import { ApiProperty } from '@nestjsx/crud/lib/crud';
+import { CommonEntity } from '../../common/entity/common';
+import { IntegrationEntity } from './integration.entity';
+import { ChatEntity } from '../../chat/entity/chat.entity';
+import { BookEntity } from '../../books/entity/book.entity';
+import { DiscountEntity } from '../../purchase/entity/discount.entity';
 
 @Entity({
   name: 'users',
@@ -84,6 +86,16 @@ export class UserEntity extends CommonEntity {
 
   @OneToMany(() => ChatEntity, (chat) => chat.byUserId)
   chat: ChatEntity[];
+
+  @OneToMany(() => BookEntity, (chat) => chat.byUser, {
+    nullable: false,
+    eager: true,
+  })
+  books: string[];
+
+  @OneToOne(() => DiscountEntity)
+  @JoinColumn() // for owner
+  byUser: string;
 
   @Column({ type: 'text', nullable: true })
   picture: string;

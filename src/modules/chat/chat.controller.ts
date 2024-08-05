@@ -19,7 +19,7 @@ import { UserEntity } from '../user';
   },
 })
 @Controller('api/v1/chats')
-@ApiTags('chats')
+@ApiTags('Chats')
 export class ChatController implements CrudController<ChatEntity> {
   constructor(public service: ChatService) {}
 
