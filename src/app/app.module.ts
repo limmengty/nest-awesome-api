@@ -71,7 +71,7 @@ import { join } from 'path';
           };
           return config as TypeOrmModuleAsyncOptions;
         }
-        if (process.env.NODE_ENV === 'production') {
+        if (process.env.NODE_ENV === 'prod') {
           /**
            * Use database url in production instead
            */
