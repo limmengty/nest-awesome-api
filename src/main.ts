@@ -29,12 +29,18 @@ import { AppModule } from './app/app.module';
 import { RedisIoAdapter } from './modules/common/adapter/ws.adapter';
 // import helmet from 'helmet';
 import * as helmet from 'helmet';
+import { ConfigService } from '@nestjs/config';
 // import { RedisIoAdapter } from './modules/common/adapter/ws.adapter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const redisIoAdapter = new RedisIoAdapter(app);
-  await redisIoAdapter.connectToRedis();
+  const config: ConfigService = app.get(ConfigService);
+  const redisURL =
+    config.get('NODE_ENV') == 'dev' || config.get('NODE_ENV') == 'local.prod'
+      ? `redis://${config.get('CACHE_HOST')}:${config.get('CACHE_PORT')}`
+      : config.get('REDIS_URL');
+  await redisIoAdapter.connectToRedis(redisURL, config.get('CAHCE_PASSWORD'));
   app.use(helmet());
   setupSwagger(app);
   // Enable Cors for development
