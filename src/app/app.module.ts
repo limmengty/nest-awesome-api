@@ -75,21 +75,38 @@ import { join } from 'path';
           /**
            * Use database url in production instead
            */
-          return {
+          // for prod
+          // return {
+          //   type: configService.get<string>('DB_TYPE'),
+          //   url: configService.get<string>('DATABASE_URL'),
+          //   entities: [__dirname + './../**/**.entity{.ts,.js}'],
+          //   subscribers: [__dirname + './../**/**/*.subscriber.{ts,js}'],
+          //   // synchronize: configService.get('DB_SYNC'),
+          //   synchronize: false,
+          //   ssl: true,
+          //   retryAttempts: 20,
+          //   extra: {
+          //     ssl: {
+          //       rejectUnauthorized: false,
+          //     },
+          //   },
+          // } as TypeOrmModuleAsyncOptions;
+
+          // forlocal
+          const config = {
             type: configService.get<string>('DB_TYPE'),
-            url: configService.get<string>('DATABASE_URL'),
+            host: configService.get<string>('DB_HOST'),
+            port: configService.get<string>('DB_PORT'),
+            username: configService.get<string>('DB_USERNAME'),
+            password: configService.get<string>('DB_PASSWORD'),
+            database: configService.get<string>('DB_DATABASE'),
             entities: [__dirname + './../**/**.entity{.ts,.js}'],
-            subscribers: [__dirname + './../**/**/*.subscriber.{ts,js}'],
-            // synchronize: configService.get('DB_SYNC'),
+            subscribers: [__dirname + './../**/**/*.subscriber.{ts}'],
+            migrations: [__dirname + './../migrations/{*.ts,.js}'],
             synchronize: false,
-            ssl: true,
-            retryAttempts: 20,
-            extra: {
-              ssl: {
-                rejectUnauthorized: false,
-              },
-            },
-          } as TypeOrmModuleAsyncOptions;
+            migrationsRun: true,
+          };
+          return config as TypeOrmModuleAsyncOptions;
         }
       },
     }),
